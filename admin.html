@@ -11,6 +11,9 @@
 
 <link rel="stylesheet" href="style.css">
 
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <style>
 
@@ -62,8 +65,8 @@
 
 
 #loginBox,
+#resetBox,
 #adminPanel{
-    display:flex;
     flex-direction:column;
     gap:15px;
 }
@@ -78,6 +81,7 @@
     border-radius:12px;
     color:white;
     font-size:16px;
+    box-sizing:border-box;
 }
 
 
@@ -98,13 +102,27 @@
 
 
 .login-btn,
-.upload-btn{
+.upload-btn,
+.reset-btn{
     background:linear-gradient(
         90deg,
         #0072ff,
         #00c6ff
     );
 
+    color:white;
+}
+
+
+.forgot-btn{
+    background:transparent;
+    color:#00c6ff;
+    border:1px solid #00c6ff !important;
+}
+
+
+.back-login-btn{
+    background:#333;
     color:white;
 }
 
@@ -119,6 +137,7 @@
     text-align:center;
     color:#aaa;
     min-height:20px;
+    line-height:1.5;
 }
 
 
@@ -186,7 +205,6 @@
     opacity:0.85;
 }
 
-
 </style>
 
 </head>
@@ -202,19 +220,20 @@
     <h1>Phobicc_ajmall Admin</h1>
 
 
-
     <!-- =========================
          LOGIN BOX
     ========================== -->
 
-    <div id="loginBox">
-
+    <div
+        id="loginBox"
+        style="display:flex"
+    >
 
         <input
-            type="text"
+            type="email"
             id="username"
-            placeholder="Admin Username"
-            autocomplete="username"
+            placeholder="Admin Email"
+            autocomplete="email"
         >
 
 
@@ -234,11 +253,65 @@
         </button>
 
 
+        <button
+            class="forgot-btn"
+            onclick="forgotPassword()"
+        >
+            Forgot Password?
+        </button>
+
+
         <div
             id="loginStatus"
             class="status"
         ></div>
 
+    </div>
+
+
+
+    <!-- =========================
+         PASSWORD RESET BOX
+    ========================== -->
+
+    <div
+        id="resetBox"
+        style="display:none"
+    >
+
+        <h2 style="text-align:center;color:white;">
+            Create New Password
+        </h2>
+
+
+        <input
+            type="password"
+            id="newPassword"
+            placeholder="New Password"
+            autocomplete="new-password"
+        >
+
+
+        <input
+            type="password"
+            id="confirmPassword"
+            placeholder="Confirm New Password"
+            autocomplete="new-password"
+        >
+
+
+        <button
+            class="reset-btn"
+            onclick="updatePassword()"
+        >
+            Update Password
+        </button>
+
+
+        <div
+            id="resetStatus"
+            class="status"
+        ></div>
 
     </div>
 
@@ -257,7 +330,6 @@
         <h2>Upload Photo or Video</h2>
 
 
-
         <!-- FILE SELECT -->
 
         <input
@@ -265,7 +337,6 @@
             id="media"
             accept="image/*,video/*"
         >
-
 
 
         <!-- DESCRIPTION -->
@@ -276,14 +347,12 @@
         ></textarea>
 
 
-
         <!-- DETAILS -->
 
         <textarea
             id="details"
             placeholder="Write details here..."
         ></textarea>
-
 
 
         <!-- UPLOAD BUTTON -->
@@ -294,7 +363,6 @@
         >
             Upload Photo / Video
         </button>
-
 
 
         <!-- UPLOAD STATUS -->
@@ -312,16 +380,11 @@
 
         <div class="media-manager">
 
-
             <h2>Manage Uploaded Media</h2>
 
-
-            <div
-                id="mediaList"
-            >
+            <div id="mediaList">
                 Loading...
             </div>
-
 
         </div>
 
@@ -337,9 +400,7 @@
         </button>
 
 
-
         <br>
-
 
 
         <!-- BACK TO WEBSITE -->
@@ -362,130 +423,421 @@
 
 <script>
 
+/* =====================================================
+   SUPABASE CONFIGURATION
+===================================================== */
+
+const SUPABASE_URL =
+    "https://nyynuenoweujnmnrzqdp.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_YCgX3_wvq0Y5q0N3h1_RJg_1N2wGCs7";
 
 
-/* =========================
-   CHECK ADMIN LOGIN
-========================= */
+const supabase =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+/* =====================================================
+   LIVE ADMIN PAGE URL
+===================================================== */
+
+const ADMIN_URL =
+    window.location.origin +
+    window.location.pathname;
+
+
+/* =====================================================
+   CHECK LOGIN / SESSION
+===================================================== */
 
 async function checkAdmin(){
 
     try{
 
-        const response =
-            await fetch(
-                "/api/admin-status"
-            );
+        const {
+            data: {
+                session
+            }
+        } = await supabase.auth.getSession();
 
 
-        const data =
-            await response.json();
+        if(session){
 
+            showAdminPanel();
 
-        if(data.isAdmin){
-
+        }
+        else{
 
             document
                 .getElementById("loginBox")
-                .style.display =
-                "none";
-
+                .style.display = "flex";
 
             document
                 .getElementById("adminPanel")
-                .style.display =
-                "flex";
-
-
-            /* LOAD MEDIA */
-
-            loadMedia();
+                .style.display = "none";
 
         }
 
     }
-
     catch(error){
 
-        console.error(error);
+        console.error(
+            "Session check error:",
+            error
+        );
 
     }
 
 }
 
 
+/* =====================================================
+   SHOW ADMIN PANEL
+===================================================== */
 
-/* RUN CHECK */
+function showAdminPanel(){
 
-checkAdmin();
+    document
+        .getElementById("loginBox")
+        .style.display = "none";
 
 
+    document
+        .getElementById("resetBox")
+        .style.display = "none";
 
-/* =========================
+
+    document
+        .getElementById("adminPanel")
+        .style.display = "flex";
+
+
+    if(typeof loadMedia === "function"){
+
+        loadMedia();
+
+    }
+
+}
+
+
+/* =====================================================
    LOGIN
-========================= */
+===================================================== */
 
-const SUPABASE_URL = "https://nyynuenoweujnmnrzqdp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YCgX3_wvq0Y5q0N3h1_RJg_1N2wGCs7";
-
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
-
-async function login() {
+async function login(){
 
     const email =
-        document.getElementById("username").value.trim();
+        document
+            .getElementById("username")
+            .value
+            .trim();
+
 
     const password =
-        document.getElementById("password").value;
+        document
+            .getElementById("password")
+            .value;
+
 
     const status =
-        document.getElementById("loginStatus");
+        document
+            .getElementById("loginStatus");
 
-    if (!email || !password) {
+
+    if(!email || !password){
+
         status.textContent =
             "Please enter email and password.";
+
         return;
+
     }
 
-    status.textContent = "Logging in...";
 
-    const { data, error } =
+    status.textContent =
+        "Logging in...";
+
+
+    const {
+        data,
+        error
+    } =
         await supabase.auth.signInWithPassword({
+
             email: email,
+
             password: password
+
         });
 
-    if (error) {
+
+    if(error){
+
         status.textContent =
-            "Login failed: " + error.message;
+            "Login failed: " +
+            error.message;
+
         return;
+
     }
 
-    status.textContent = "Login successful!";
 
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("adminPanel").style.display = "flex";
+    if(data.session){
 
-    if (typeof loadMedia === "function") {
-        loadMedia();
+        status.textContent =
+            "Login successful!";
+
+
+        showAdminPanel();
+
     }
+
 }
 
-/* =========================
+
+/* =====================================================
+   FORGOT PASSWORD
+===================================================== */
+
+async function forgotPassword(){
+
+    const email =
+        document
+            .getElementById("username")
+            .value
+            .trim();
+
+
+    const status =
+        document
+            .getElementById("loginStatus");
+
+
+    if(!email){
+
+        status.textContent =
+            "Enter your admin email first.";
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Sending password reset email...";
+
+
+    const {
+        error
+    } =
+        await supabase.auth.resetPasswordForEmail(
+            email,
+            {
+                redirectTo: ADMIN_URL
+            }
+        );
+
+
+    if(error){
+
+        status.textContent =
+            "Reset email failed: " +
+            error.message;
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Password reset email sent. Check your email.";
+
+}
+
+
+/* =====================================================
+   SUPABASE PASSWORD RECOVERY EVENT
+===================================================== */
+
+supabase.auth.onAuthStateChange(
+    async function(event, session){
+
+        console.log(
+            "Auth event:",
+            event
+        );
+
+
+        if(event === "PASSWORD_RECOVERY"){
+
+            document
+                .getElementById("loginBox")
+                .style.display = "none";
+
+
+            document
+                .getElementById("adminPanel")
+                .style.display = "none";
+
+
+            document
+                .getElementById("resetBox")
+                .style.display = "flex";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   UPDATE PASSWORD
+===================================================== */
+
+async function updatePassword(){
+
+    const newPassword =
+        document
+            .getElementById("newPassword")
+            .value;
+
+
+    const confirmPassword =
+        document
+            .getElementById("confirmPassword")
+            .value;
+
+
+    const status =
+        document
+            .getElementById("resetStatus");
+
+
+    if(!newPassword || !confirmPassword){
+
+        status.textContent =
+            "Please enter both password fields.";
+
+        return;
+
+    }
+
+
+    if(newPassword.length < 6){
+
+        status.textContent =
+            "Password must be at least 6 characters.";
+
+        return;
+
+    }
+
+
+    if(newPassword !== confirmPassword){
+
+        status.textContent =
+            "Passwords do not match.";
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Updating password...";
+
+
+    const {
+        error
+    } =
+        await supabase.auth.updateUser({
+
+            password: newPassword
+
+        });
+
+
+    if(error){
+
+        status.textContent =
+            "Password update failed: " +
+            error.message;
+
+        return;
+
+    }
+
+
+    status.textContent =
+        "Password updated successfully!";
+
+
+    document
+        .getElementById("newPassword")
+        .value = "";
+
+
+    document
+        .getElementById("confirmPassword")
+        .value = "";
+
+
+    setTimeout(
+        function(){
+
+            showLoginBox();
+
+        },
+        2000
+    );
+
+}
+
+
+/* =====================================================
+   SHOW LOGIN BOX
+===================================================== */
+
+function showLoginBox(){
+
+    document
+        .getElementById("resetBox")
+        .style.display = "none";
+
+
+    document
+        .getElementById("adminPanel")
+        .style.display = "none";
+
+
+    document
+        .getElementById("loginBox")
+        .style.display = "flex";
+
+
+    document
+        .getElementById("loginStatus")
+        .textContent =
+            "You can now login with your new password.";
+
+}
+
+
+/* =====================================================
    UPLOAD MEDIA
-========================= */
+===================================================== */
 
 async function uploadMedia(){
-
 
     const file =
         document
             .getElementById("media")
             .files[0];
-
 
 
     const description =
@@ -494,12 +846,10 @@ async function uploadMedia(){
             .value;
 
 
-
     const details =
         document
             .getElementById("details")
             .value;
-
 
 
     const status =
@@ -507,125 +857,83 @@ async function uploadMedia(){
             .getElementById("uploadStatus");
 
 
-
     if(!file){
-
 
         status.textContent =
             "Please select a photo or video.";
-
 
         return;
 
     }
 
 
-
     const formData =
         new FormData();
 
 
-
     formData.append(
-
         "media",
-
         file
-
     );
 
 
-
     formData.append(
-
         "description",
-
         description
-
     );
-
 
 
     formData.append(
-
         "details",
-
         details
-
     );
-
 
 
     status.textContent =
         "Uploading... Please wait.";
 
 
-
     try{
-
 
         const response =
             await fetch(
-
                 "/api/upload",
-
                 {
-
                     method:"POST",
-
                     body:formData
-
                 }
-
             );
-
 
 
         const data =
             await response.json();
 
 
-
         if(data.success){
-
 
             status.textContent =
                 "Upload successful!";
 
 
-
-            /* CLEAR FORM */
-
-
             document
                 .getElementById("media")
-                .value =
-                "";
+                .value = "";
 
 
             document
                 .getElementById("description")
-                .value =
-                "";
+                .value = "";
 
 
             document
                 .getElementById("details")
-                .value =
-                "";
-
-
-            /* REFRESH MEDIA LIST */
+                .value = "";
 
 
             loadMedia();
 
-
         }
-
-
         else{
-
 
             status.textContent =
                 data.message ||
@@ -633,46 +941,35 @@ async function uploadMedia(){
 
         }
 
-
     }
-
-
     catch(error){
 
-
         console.error(error);
-
 
         status.textContent =
             "Upload error. Check server.";
 
     }
 
-
 }
 
 
-
-/* =========================
-   LOAD UPLOADED MEDIA
-========================= */
+/* =====================================================
+   LOAD MEDIA
+===================================================== */
 
 async function loadMedia(){
-
 
     const mediaList =
         document
             .getElementById("mediaList");
 
 
-
     mediaList.innerHTML =
         "Loading media...";
 
 
-
     try{
-
 
         const response =
             await fetch(
@@ -680,34 +977,25 @@ async function loadMedia(){
             );
 
 
-
         const mediaItems =
             await response.json();
 
 
-
         if(!mediaItems.length){
-
 
             mediaList.innerHTML =
                 "No media uploaded yet.";
-
 
             return;
 
         }
 
 
-
-        mediaList.innerHTML =
-            "";
-
+        mediaList.innerHTML = "";
 
 
         mediaItems.forEach(
-
             function(item){
-
 
                 const container =
                     document.createElement(
@@ -715,66 +1003,38 @@ async function loadMedia(){
                     );
 
 
-
                 container.className =
                     "admin-media-item";
-
 
 
                 let mediaElement;
 
 
+                if(item.type === "video"){
 
-                /* VIDEO */
-
-
-                if(
-
-                    item.type ===
-                    "video"
-
-                ){
-
-
-                    mediaElement =
-                        `
-
+                    mediaElement = `
                         <video
                             controls
                             src="/uploads/${item.filename}"
                         ></video>
-
-                        `;
+                    `;
 
                 }
-
-
-
-                /* IMAGE */
-
-
                 else{
 
-
-                    mediaElement =
-                        `
-
+                    mediaElement = `
                         <img
                             src="/uploads/${item.filename}"
                             alt="Uploaded media"
                         >
-
-                        `;
+                    `;
 
                 }
 
 
-
-                container.innerHTML =
-                    `
+                container.innerHTML = `
 
                     ${mediaElement}
-
 
                     <div
                         class="admin-media-description"
@@ -786,10 +1046,12 @@ async function loadMedia(){
 
                         <br>
 
-                        ${item.description || "No description"}
+                        ${
+                            item.description ||
+                            "No description"
+                        }
 
                     </div>
-
 
 
                     <div
@@ -802,63 +1064,51 @@ async function loadMedia(){
 
                         <br>
 
-                        ${item.details || "No details"}
+                        ${
+                            item.details ||
+                            "No details"
+                        }
 
                     </div>
 
 
-
                     <button
-
                         class="delete-btn"
-
                         onclick="deleteMedia(${item.id})"
-
                     >
 
                         🗑 Delete This Media
 
                     </button>
 
-                    `;
-
+                `;
 
 
                 mediaList.appendChild(
                     container
                 );
 
-
             }
-
         );
 
-
     }
-
-
     catch(error){
 
-
         console.error(error);
-
 
         mediaList.innerHTML =
             "Could not load media.";
 
     }
 
-
 }
 
 
-
-/* =========================
+/* =====================================================
    DELETE MEDIA
-========================= */
+===================================================== */
 
 async function deleteMedia(id){
-
 
     const confirmed =
         confirm(
@@ -866,18 +1116,14 @@ async function deleteMedia(id){
         );
 
 
-
     if(!confirmed){
-
 
         return;
 
     }
 
 
-
     try{
-
 
         const response =
             await fetch(
@@ -885,59 +1131,39 @@ async function deleteMedia(id){
                 `/api/media/${id}`,
 
                 {
-
                     method:"DELETE"
-
                 }
 
             );
-
 
 
         const data =
             await response.json();
 
 
-
         if(data.success){
-
 
             alert(
                 "Media deleted successfully!"
             );
 
 
-
-            /* REFRESH LIST */
-
-
             loadMedia();
 
-
         }
-
-
         else{
 
-
             alert(
-
                 data.message ||
                 "Delete failed."
-
             );
 
         }
 
-
     }
-
-
     catch(error){
 
-
         console.error(error);
-
 
         alert(
             "Delete error. Check server."
@@ -945,58 +1171,44 @@ async function deleteMedia(id){
 
     }
 
-
 }
 
 
-
-/* =========================
+/* =====================================================
    LOGOUT
-========================= */
+===================================================== */
 
 async function logout(){
 
-
     try{
 
-
-        await fetch(
-
-            "/api/logout",
-
-            {
-
-                method:"POST"
-
-            }
-
-        );
-
+        await supabase.auth.signOut();
 
     }
-
-
     catch(error){
 
-
-        console.error(error);
+        console.error(
+            "Logout error:",
+            error
+        );
 
     }
-
 
 
     location.reload();
 
-
 }
 
 
-</script>
+/* =====================================================
+   START
+===================================================== */
 
+checkAdmin();
+
+</script>
 
 
 </body>
 
 </html>
-
-
