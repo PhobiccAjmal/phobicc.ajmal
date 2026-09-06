@@ -635,7 +635,7 @@ async function forgotPassword(){
     const {
         error
     } =
-        await supabase.auth.resetPasswordForEmail(
+        await supabaseClient.auth.resetPasswordForEmail(
             email,
             {
                 redirectTo: ADMIN_URL
