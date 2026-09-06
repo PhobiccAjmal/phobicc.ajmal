@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin - Phobicc_ajmall</title>
+
+<link rel="stylesheet" href="style.css">
+
+
+<style>
+
+/* =========================
+   ADMIN PAGE EXTRA DESIGN
+========================= */
+
+.admin-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:30px 15px;
+}
+
+
+.admin-container{
+    width:100%;
+    max-width:650px;
+    background:#111;
+    border:1px solid #292929;
+    border-radius:25px;
+    padding:35px;
+}
+
+
+.admin-container h1{
+    text-align:center;
+    margin-bottom:30px;
+
+    background:linear-gradient(
+        90deg,
+        #00c6ff,
+        #0072ff,
+        #8a2be2,
+        #ff00cc,
+        #00c6ff
+    );
+
+    background-size:300%;
+
+    -webkit-background-clip:text;
+    background-clip:text;
+
+    color:transparent;
+
+    animation:rainbowMove 5s linear infinite;
+}
+
+
+#loginBox,
+#adminPanel{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+
+.admin-container input,
+.admin-container textarea{
+    width:100%;
+    padding:15px;
+    background:#222;
+    border:1px solid #333;
+    border-radius:12px;
+    color:white;
+    font-size:16px;
+}
+
+
+.admin-container textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+
+.admin-container button{
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+}
+
+
+.login-btn,
+.upload-btn{
+    background:linear-gradient(
+        90deg,
+        #0072ff,
+        #00c6ff
+    );
+
+    color:white;
+}
+
+
+.logout-btn{
+    background:#b22222;
+    color:white;
+}
+
+
+.status{
+    text-align:center;
+    color:#aaa;
+    min-height:20px;
+}
+
+
+/* =========================
+   MANAGE MEDIA
+========================= */
+
+.media-manager{
+    margin-top:30px;
+    border-top:1px solid #333;
+    padding-top:25px;
+}
+
+
+.media-manager h2{
+    text-align:center;
+    color:white;
+}
+
+
+.admin-media-item{
+    background:#1b1b1b;
+    border:1px solid #333;
+    border-radius:15px;
+    padding:15px;
+    margin-top:15px;
+}
+
+
+.admin-media-item img,
+.admin-media-item video{
+    width:100%;
+    max-height:350px;
+    object-fit:contain;
+    border-radius:10px;
+    background:#000;
+}
+
+
+.admin-media-description{
+    margin-top:12px;
+    color:#ddd;
+    word-break:break-word;
+}
+
+
+.admin-media-details{
+    margin-top:8px;
+    color:#999;
+    font-size:14px;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+
+.delete-btn{
+    width:100%;
+    margin-top:15px;
+    background:#b22222;
+    color:white;
+}
+
+
+.delete-btn:hover{
+    opacity:0.85;
+}
+
+
+</style>
+
+</head>
+
+
+
+<body class="admin-page">
+
+
+<div class="admin-container">
+
+
+    <h1>Phobicc_ajmall Admin</h1>
+
+
+
+    <!-- =========================
+         LOGIN BOX
+    ========================== -->
+
+    <div id="loginBox">
+
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Admin Username"
+            autocomplete="username"
+        >
+
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Admin Password"
+            autocomplete="current-password"
+        >
+
+
+        <button
+            class="login-btn"
+            onclick="login()"
+        >
+            Login
+        </button>
+
+
+        <div
+            id="loginStatus"
+            class="status"
+        ></div>
+
+
+    </div>
+
+
+
+    <!-- =========================
+         ADMIN PANEL
+    ========================== -->
+
+    <div
+        id="adminPanel"
+        style="display:none"
+    >
+
+
+        <h2>Upload Photo or Video</h2>
+
+
+
+        <!-- FILE SELECT -->
+
+        <input
+            type="file"
+            id="media"
+            accept="image/*,video/*"
+        >
+
+
+
+        <!-- DESCRIPTION -->
+
+        <textarea
+            id="description"
+            placeholder="Write description here..."
+        ></textarea>
+
+
+
+        <!-- DETAILS -->
+
+        <textarea
+            id="details"
+            placeholder="Write details here..."
+        ></textarea>
+
+
+
+        <!-- UPLOAD BUTTON -->
+
+        <button
+            class="upload-btn"
+            onclick="uploadMedia()"
+        >
+            Upload Photo / Video
+        </button>
+
+
+
+        <!-- UPLOAD STATUS -->
+
+        <div
+            id="uploadStatus"
+            class="status"
+        ></div>
+
+
+
+        <!-- =========================
+             MANAGE UPLOADED MEDIA
+        ========================== -->
+
+        <div class="media-manager">
+
+
+            <h2>Manage Uploaded Media</h2>
+
+
+            <div
+                id="mediaList"
+            >
+                Loading...
+            </div>
+
+
+        </div>
+
+
+
+        <!-- LOGOUT -->
+
+        <button
+            class="logout-btn"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+
+
+        <br>
+
+
+
+        <!-- BACK TO WEBSITE -->
+
+        <a
+            href="index.html"
+            class="admin-button"
+            style="text-align:center"
+        >
+            ← Back to Website
+        </a>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+
+/* =========================
+   CHECK ADMIN LOGIN
+========================= */
+
+async function checkAdmin(){
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/admin-status"
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(data.isAdmin){
+
+
+            document
+                .getElementById("loginBox")
+                .style.display =
+                "none";
+
+
+            document
+                .getElementById("adminPanel")
+                .style.display =
+                "flex";
+
+
+            /* LOAD MEDIA */
+
+            loadMedia();
+
+        }
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+
+/* RUN CHECK */
+
+checkAdmin();
+
+
+
+/* =========================
+   LOGIN
+========================= */
+
+async function login(){
+
+
+    const username =
+        document
+            .getElementById("username")
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById("password")
+            .value;
+
+
+    const status =
+        document
+            .getElementById("loginStatus");
+
+
+
+    if(!username || !password){
+
+
+        status.textContent =
+            "Please enter username and password.";
+
+
+        return;
+
+    }
+
+
+
+    status.textContent =
+        "Logging in...";
+
+
+
+    try{
+
+
+        const response =
+            await fetch(
+
+                "/api/login",
+
+                {
+
+                    method:"POST",
+
+
+                    headers:{
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+
+                    body:
+
+                        JSON.stringify({
+
+                            username,
+                            password
+
+                        })
+
+                }
+
+            );
+
+
+
+        const data =
+            await response.json();
+
+
+
+        if(data.success){
+
+
+            status.textContent =
+                "Login successful!";
+
+
+
+            document
+                .getElementById("loginBox")
+                .style.display =
+                "none";
+
+
+
+            document
+                .getElementById("adminPanel")
+                .style.display =
+                "flex";
+
+
+            /* LOAD ALL UPLOADED MEDIA */
+
+            loadMedia();
+
+
+        }
+
+
+        else{
+
+
+            status.textContent =
+                data.message ||
+                "Wrong username or password.";
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        status.textContent =
+            "Server connection error.";
+
+    }
+
+
+}
+
+
+
+/* =========================
+   UPLOAD MEDIA
+========================= */
+
+async function uploadMedia(){
+
+
+    const file =
+        document
+            .getElementById("media")
+            .files[0];
+
+
+
+    const description =
+        document
+            .getElementById("description")
+            .value;
+
+
+
+    const details =
+        document
+            .getElementById("details")
+            .value;
+
+
+
+    const status =
+        document
+            .getElementById("uploadStatus");
+
+
+
+    if(!file){
+
+
+        status.textContent =
+            "Please select a photo or video.";
+
+
+        return;
+
+    }
+
+
+
+    const formData =
+        new FormData();
+
+
+
+    formData.append(
+
+        "media",
+
+        file
+
+    );
+
+
+
+    formData.append(
+
+        "description",
+
+        description
+
+    );
+
+
+
+    formData.append(
+
+        "details",
+
+        details
+
+    );
+
+
+
+    status.textContent =
+        "Uploading... Please wait.";
+
+
+
+    try{
+
+
+        const response =
+            await fetch(
+
+                "/api/upload",
+
+                {
+
+                    method:"POST",
+
+                    body:formData
+
+                }
+
+            );
+
+
+
+        const data =
+            await response.json();
+
+
+
+        if(data.success){
+
+
+            status.textContent =
+                "Upload successful!";
+
+
+
+            /* CLEAR FORM */
+
+
+            document
+                .getElementById("media")
+                .value =
+                "";
+
+
+            document
+                .getElementById("description")
+                .value =
+                "";
+
+
+            document
+                .getElementById("details")
+                .value =
+                "";
+
+
+            /* REFRESH MEDIA LIST */
+
+
+            loadMedia();
+
+
+        }
+
+
+        else{
+
+
+            status.textContent =
+                data.message ||
+                "Upload failed.";
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        status.textContent =
+            "Upload error. Check server.";
+
+    }
+
+
+}
+
+
+
+/* =========================
+   LOAD UPLOADED MEDIA
+========================= */
+
+async function loadMedia(){
+
+
+    const mediaList =
+        document
+            .getElementById("mediaList");
+
+
+
+    mediaList.innerHTML =
+        "Loading media...";
+
+
+
+    try{
+
+
+        const response =
+            await fetch(
+                "/api/media"
+            );
+
+
+
+        const mediaItems =
+            await response.json();
+
+
+
+        if(!mediaItems.length){
+
+
+            mediaList.innerHTML =
+                "No media uploaded yet.";
+
+
+            return;
+
+        }
+
+
+
+        mediaList.innerHTML =
+            "";
+
+
+
+        mediaItems.forEach(
+
+            function(item){
+
+
+                const container =
+                    document.createElement(
+                        "div"
+                    );
+
+
+
+                container.className =
+                    "admin-media-item";
+
+
+
+                let mediaElement;
+
+
+
+                /* VIDEO */
+
+
+                if(
+
+                    item.type ===
+                    "video"
+
+                ){
+
+
+                    mediaElement =
+                        `
+
+                        <video
+                            controls
+                            src="/uploads/${item.filename}"
+                        ></video>
+
+                        `;
+
+                }
+
+
+
+                /* IMAGE */
+
+
+                else{
+
+
+                    mediaElement =
+                        `
+
+                        <img
+                            src="/uploads/${item.filename}"
+                            alt="Uploaded media"
+                        >
+
+                        `;
+
+                }
+
+
+
+                container.innerHTML =
+                    `
+
+                    ${mediaElement}
+
+
+                    <div
+                        class="admin-media-description"
+                    >
+
+                        <strong>
+                            Description:
+                        </strong>
+
+                        <br>
+
+                        ${item.description || "No description"}
+
+                    </div>
+
+
+
+                    <div
+                        class="admin-media-details"
+                    >
+
+                        <strong>
+                            Details:
+                        </strong>
+
+                        <br>
+
+                        ${item.details || "No details"}
+
+                    </div>
+
+
+
+                    <button
+
+                        class="delete-btn"
+
+                        onclick="deleteMedia(${item.id})"
+
+                    >
+
+                        🗑 Delete This Media
+
+                    </button>
+
+                    `;
+
+
+
+                mediaList.appendChild(
+                    container
+                );
+
+
+            }
+
+        );
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        mediaList.innerHTML =
+            "Could not load media.";
+
+    }
+
+
+}
+
+
+
+/* =========================
+   DELETE MEDIA
+========================= */
+
+async function deleteMedia(id){
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this photo or video?"
+        );
+
+
+
+    if(!confirmed){
+
+
+        return;
+
+    }
+
+
+
+    try{
+
+
+        const response =
+            await fetch(
+
+                `/api/media/${id}`,
+
+                {
+
+                    method:"DELETE"
+
+                }
+
+            );
+
+
+
+        const data =
+            await response.json();
+
+
+
+        if(data.success){
+
+
+            alert(
+                "Media deleted successfully!"
+            );
+
+
+
+            /* REFRESH LIST */
+
+
+            loadMedia();
+
+
+        }
+
+
+        else{
+
+
+            alert(
+
+                data.message ||
+                "Delete failed."
+
+            );
+
+        }
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+
+        alert(
+            "Delete error. Check server."
+        );
+
+    }
+
+
+}
+
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout(){
+
+
+    try{
+
+
+        await fetch(
+
+            "/api/logout",
+
+            {
+
+                method:"POST"
+
+            }
+
+        );
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(error);
+
+    }
+
+
+
+    location.reload();
+
+
+}
+
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,509 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#000;
+    color:#fff;
+    font-family:Arial, Helvetica, sans-serif;
+    overflow-x:hidden;
+}
+
+
+/* =========================
+   INTRO SCREEN
+========================= */
+
+#intro{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100vh;
+    background:#000;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity 2s ease;
+}
+
+.intro-screen{
+    position:absolute;
+    width:100%;
+    text-align:center;
+    padding:20px;
+    transition:opacity 1s ease, transform 1s ease;
+}
+
+.intro-screen h1{
+    font-size:clamp(55px, 12vw, 160px);
+    font-weight:900;
+}
+
+
+/* =========================
+   HIDDEN SCREEN
+========================= */
+
+.hidden{
+    opacity:0;
+    pointer-events:none;
+    transform:scale(.7);
+}
+
+
+/* =========================
+   WELCOME ANIMATION
+========================= */
+
+#welcomeScreen h1{
+    letter-spacing:12px;
+    animation:welcomeAnimation 10s ease forwards;
+}
+
+@keyframes welcomeAnimation{
+
+    0%{
+        opacity:0;
+        transform:scale(.3) rotateX(90deg);
+        filter:blur(20px);
+    }
+
+    15%{
+        opacity:1;
+        transform:scale(1);
+        filter:blur(0);
+    }
+
+    70%{
+        opacity:1;
+        transform:scale(1.1);
+    }
+
+    100%{
+        opacity:0;
+        transform:scale(1.5);
+        filter:blur(15px);
+    }
+}
+
+
+/* =========================
+   PHOBICC MULTI COLOR
+========================= */
+
+.rainbow-text{
+    background:
+        linear-gradient(
+            90deg,
+            #ff0000,
+            #ff8c00,
+            #ffff00,
+            #00ff00,
+            #00ffff,
+            #0066ff,
+            #8a2be2,
+            #ff00ff,
+            #ff0000
+        );
+
+    background-size:500% 100%;
+
+    -webkit-background-clip:text;
+    background-clip:text;
+
+    color:transparent;
+
+    animation:
+        nameAnimation 10s ease forwards,
+        rainbowMove 3s linear infinite;
+}
+
+@keyframes rainbowMove{
+
+    0%{
+        background-position:0% 50%;
+    }
+
+    100%{
+        background-position:100% 50%;
+    }
+}
+
+
+@keyframes nameAnimation{
+
+    0%{
+        opacity:0;
+        transform:scale(.3);
+        filter:blur(20px);
+    }
+
+    15%{
+        opacity:1;
+        transform:scale(1);
+        filter:blur(0);
+    }
+
+    75%{
+        opacity:1;
+        transform:scale(1.08);
+    }
+
+    100%{
+        opacity:0;
+        transform:scale(1.5);
+        filter:blur(15px);
+    }
+}
+
+
+/* =========================
+   MAIN WEBSITE
+========================= */
+
+#main{
+    min-height:100vh;
+    padding:50px 20px;
+    background:
+        radial-gradient(
+            circle at top,
+            #10182d,
+            #000 60%
+        );
+}
+
+header{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+.site-title{
+    font-size:clamp(40px, 8vw, 90px);
+    font-weight:900;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00c6ff,
+            #0072ff,
+            #8a2be2,
+            #ff00cc,
+            #00c6ff
+        );
+
+    background-size:300%;
+
+    -webkit-background-clip:text;
+    background-clip:text;
+
+    color:transparent;
+
+    animation:rainbowMove 6s linear infinite;
+}
+
+
+/* =========================
+   INSTAGRAM ID
+========================= */
+
+.instagram-id{
+
+    margin-top:15px;
+
+    margin-bottom:12px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+}
+
+
+.instagram-id span{
+
+    color:#aaa;
+
+}
+
+
+.instagram-id a{
+
+    margin-left:8px;
+
+    color:#ff00cc;
+
+    text-decoration:none;
+
+    transition:.3s;
+
+}
+
+
+.instagram-id a:hover{
+
+    color:#00c6ff;
+
+    text-shadow:
+        0 0 10px #ff00cc,
+        0 0 25px #ff00cc;
+
+}
+
+
+header p{
+    margin-top:15px;
+    color:#aaa;
+    font-size:18px;
+}
+
+
+/* =========================
+   GALLERY
+========================= */
+
+.gallery-section{
+    max-width:1200px;
+    margin:auto;
+}
+
+.gallery-section h2{
+    font-size:32px;
+    margin-bottom:25px;
+    text-align:center;
+}
+
+.gallery{
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+    gap:25px;
+}
+
+
+.empty-message{
+    grid-column:1/-1;
+
+    text-align:center;
+
+    padding:80px 20px;
+
+    color:#777;
+
+    font-size:20px;
+
+    border:
+        1px dashed #333;
+
+    border-radius:20px;
+}
+
+
+/* =========================
+   GALLERY CARD
+========================= */
+
+.card{
+    background:#111;
+
+    border:
+        1px solid #222;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    transition:
+        transform .3s ease,
+        border .3s ease;
+}
+
+.card:hover{
+
+    transform:
+        translateY(-10px);
+
+    border-color:#00aaff;
+}
+
+.card img,
+.card video{
+
+    width:100%;
+
+    height:320px;
+
+    object-fit:cover;
+
+    display:block;
+}
+
+.card-content{
+
+    padding:20px;
+}
+
+.card-content h3{
+
+    margin-bottom:10px;
+
+    font-size:22px;
+}
+
+.card-content p{
+
+    color:#aaa;
+
+    line-height:1.6;
+}
+
+
+/* =========================
+   CONTACT SECTION
+========================= */
+
+.contact-section{
+
+    max-width:700px;
+
+    margin:
+        80px auto 40px;
+
+    text-align:center;
+
+    padding:40px 20px;
+
+    background:#0d0d0d;
+
+    border:
+        1px solid #222;
+
+    border-radius:25px;
+}
+
+.contact-section h2{
+
+    font-size:32px;
+
+    margin-bottom:15px;
+}
+
+.contact-section p{
+
+    color:#aaa;
+
+    margin-bottom:25px;
+}
+
+#contactButton{
+
+    display:inline-block;
+
+    padding:
+        14px 30px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #0072ff,
+            #00c6ff
+        );
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:50px;
+
+    font-weight:bold;
+
+    transition:.3s;
+}
+
+#contactButton:hover{
+
+    transform:
+        scale(1.08);
+
+    box-shadow:
+        0 0 25px #0072ff;
+}
+
+
+/* =========================
+   ADMIN BUTTON
+========================= */
+
+.admin-area{
+
+    text-align:center;
+
+    margin-top:50px;
+}
+
+.admin-button{
+
+    display:inline-block;
+
+    padding:
+        12px 25px;
+
+    border:
+        1px solid #333;
+
+    border-radius:50px;
+
+    color:#aaa;
+
+    text-decoration:none;
+
+    transition:.3s;
+}
+
+.admin-button:hover{
+
+    color:#fff;
+
+    border-color:#00aaff;
+
+    box-shadow:
+        0 0 20px #00aaff;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:600px){
+
+    #main{
+        padding:35px 15px;
+    }
+
+    .card img,
+    .card video{
+        height:260px;
+    }
+
+    #welcomeScreen h1{
+        letter-spacing:5px;
+    }
+
+    .instagram-id{
+
+        font-size:19px;
+
+    }
+
+}
