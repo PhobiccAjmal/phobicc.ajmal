@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+b<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -188,7 +188,8 @@
 
 
 </style>
-
+<script
+   src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 
@@ -425,142 +426,69 @@ checkAdmin();
    LOGIN
 ========================= */
 
-async function login(){
+<script>
+const SUPABASE_URL = "https://nyynuenoweujnmnrzqdp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YCgX3_wvq0Y5q0N3h1_RJg_1N2wGCs7";
 
+const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
 
-    const username =
-        document
-            .getElementById("username")
-            .value
-            .trim();
+async function login() {
+    const email = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const status = document.getElementById("loginStatus");
 
-
-    const password =
-        document
-            .getElementById("password")
-            .value;
-
-
-    const status =
-        document
-            .getElementById("loginStatus");
-
-
-
-    if(!username || !password){
-
-
-        status.textContent =
-            "Please enter username and password.";
-
-
+    if (!email || !password) {
+        status.textContent = "Please enter email and password.";
         return;
-
     }
 
+    status.textContent = "Logging in...";
 
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
 
-    status.textContent =
-        "Logging in...";
-
-
-
-    try{
-
-
-        const response =
-            await fetch(
-
-                "/api/login",
-
-                {
-
-                    method:"POST",
-
-
-                    headers:{
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-
-                    body:
-
-                        JSON.stringify({
-
-                            username,
-                            password
-
-                        })
-
-                }
-
-            );
-
-
-
-        const data =
-            await response.json();
-
-
-
-        if(data.success){
-
-
-            status.textContent =
-                "Login successful!";
-
-
-
-            document
-                .getElementById("loginBox")
-                .style.display =
-                "none";
-
-
-
-            document
-                .getElementById("adminPanel")
-                .style.display =
-                "flex";
-
-
-            /* LOAD ALL UPLOADED MEDIA */
-
-            loadMedia();
-
-
-        }
-
-
-        else{
-
-
-            status.textContent =
-                data.message ||
-                "Wrong username or password.";
-
-        }
-
-
+    if (error) {
+        status.textContent = "Login failed: " + error.message;
+        return;
     }
 
+    status.textContent = "Login successful!";
 
-    catch(error){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "flex";
 
-
-        console.error(error);
-
-
-        status.textContent =
-            "Server connection error.";
-
+    if (typeof loadMedia === "function") {
+        loadMedia();
     }
-
-
 }
+
+async function checkAdmin() {
+    const {
+        data: { session }
+    } = await supabase.auth.getSession();
+
+    if (session) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("adminPanel").style.display = "flex";
+
+        if (typeof loadMedia === "function") {
+            loadMedia();
+        }
+    }
+}
+
+async function logout() {
+    await supabase.auth.signOut();
+    location.reload();
+}
+
+checkAdmin();
+</script>
 
 
 
